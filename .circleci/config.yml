@@ -1,0 +1,40 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/FreeRTOS-Amiga-Toolchain
+  docker:
+    - image: cahirwpz/freertos-amiga-toolchain:latest
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - toolchain-cache-{{ .Branch }}-{{ checksum ".circleci/DATESTAMP" }}
+      - run: 'make download'
+      - save_cache:
+          key: toolchain-cache-{{ .Branch }}-{{ checksum ".circleci/DATESTAMP" }}
+          paths:
+            - elf2hunk/elf2hunk.c
+            - fs-uae/fs-uae-*.tar.gz
+            - vasm/vasm.tar.gz
+            - vasm/NDK_3.9.lha
+            - gnu/gmp-*.tar.xz
+            - gnu/mpfr-*.tar.xz
+            - gnu/mpc-*.tar.gz
+            - gnu/isl-*.tar.xz
+            - gnu/binutils-*.tar.xz
+            - gnu/gcc-*.tar.xz
+            - gnu/gdb-*.tar.xz
+      - run: 'make PREFIX=/opt/FreeRTOS-Amiga'
+      - run: 'tar cvzf /FreeRTOS-Amiga-Toolchain.tar.gz /opt/FreeRTOS-Amiga'
+      - store_artifacts:
+          path: /FreeRTOS-Amiga-Toolchain.tar.gz
+
+workflows:
+  version: 2
+  FreeRTOS-Amiga-Toolchain:
+    jobs:
+      - build 
