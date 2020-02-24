@@ -1,6 +1,8 @@
 CURL = curl -L
 RM = rm -f
 
+MAKEFLAGS = -j$(shell nproc)
+
 ISL = isl-0.21
 MPFR = mpfr-4.0.2
 GMP = gmp-6.1.2
@@ -32,7 +34,7 @@ $(GMP).tar.xz:
 
 gmp-unpack: $(GMP)/.unpack
 $(GMP)/.unpack: $(GMP).tar.xz
-	tar xvJf $^
+	tar xJf $^
 	touch $@
 
 gmp-configure: $(GMP)/.configure
@@ -63,11 +65,11 @@ $(MPFR).tar.xz:
 
 mpfr-unpack: $(MPFR)/.unpack
 $(MPFR)/.unpack: $(MPFR).tar.xz
-	tar xvJf $^
+	tar xJf $^
 	touch $@
 
 mpfr-configure: $(MPFR)/.configure
-$(MPFR)/.configure: $(MPFR)/.unpack
+$(MPFR)/.configure: $(MPFR)/.unpack $(GMP)/.install
 	cd $(MPFR) && ./configure \
 		--disable-shared --prefix=$(HOSTDIR) --with-gmp=$(HOSTDIR)
 	touch $@
@@ -94,7 +96,7 @@ $(MPC).tar.gz:
 
 mpc-unpack: $(MPC)/.unpack
 $(MPC)/.unpack: $(MPC).tar.gz
-	tar xvzf $^
+	tar xzf $^
 	touch $@
 
 mpc-configure: $(MPC)/.configure
@@ -128,7 +130,7 @@ $(ISL).tar.xz:
 
 isl-unpack: $(ISL)/.unpack
 $(ISL)/.unpack: $(ISL).tar.xz
-	tar xvJf $^
+	tar xJf $^
 	touch $@
 
 isl-configure: $(ISL)/.configure
@@ -154,6 +156,13 @@ isl-clean:
 
 .PHONY: isl-unpack isl-configure isl-build isl-install isl-clean
 
+### Joint rule for all requisite libraries
+
+libs-install: $(GMP)/.install $(MPFR)/.install $(MPC)/.install \
+	      $(ISL)/.install $(MPC)/.install
+
+.PHONY: libs-install
+
 ### GNU Binutils
 
 $(BINUTILS).tar.xz:
@@ -161,11 +170,11 @@ $(BINUTILS).tar.xz:
 
 binutils-unpack: $(BINUTILS)/.unpack
 $(BINUTILS)/.unpack: $(BINUTILS).tar.xz
-	tar xvJf $^
+	tar xJf $^
 	touch $@
 
 binutils-configure: $(BINUTILS)/.configure
-$(BINUTILS)/.configure: $(BINUTILS)/.unpack $(ISL)/.install $(MPC)/.install
+$(BINUTILS)/.configure: $(BINUTILS)/.unpack libs-install
 	cd $(BINUTILS) && ./configure \
 		--target=$(TARGET) \
 		--disable-nls \
@@ -198,11 +207,11 @@ $(GCC).tar.xz:
 
 gcc-unpack: $(GCC)/.unpack
 $(GCC)/.unpack: $(GCC).tar.xz
-	tar xvJf $^
+	tar xJf $^
 	touch $@
 
 gcc-configure: $(GCC)/.configure
-$(GCC)/.configure: $(GCC)/.unpack $(BINUTILS)/.install
+$(GCC)/.configure: $(GCC)/.unpack $(BINUTILS)/.install libs-install
 	cd $(GCC) && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET) \
 		--prefix=$(PREFIX) \
@@ -242,11 +251,11 @@ $(GDB).tar.xz:
 
 gdb-unpack: $(GDB)/.unpack
 $(GDB)/.unpack: $(GDB).tar.xz
-	tar xvJf $^
+	tar xJf $^
 	touch $@
 
 gdb-configure: $(GDB)/.configure
-$(GDB)/.configure: $(GDB)/.unpack $(ISL)/.install
+$(GDB)/.configure: $(GDB)/.unpack libs-install
 	cd $(GDB) && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET)\
 		--with-isl=$(HOSTDIR) \

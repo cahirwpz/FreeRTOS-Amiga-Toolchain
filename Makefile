@@ -1,24 +1,33 @@
-TOPDIR = $(CURDIR)
-PREFIX ?= $(PWD)/toolchain
+CC = gcc -s
+CXX = g++ -s
+PREFIX ?= $(PWD)/local
 
-MAKEFLAGS := -j$(shell nproc)
+export CC CXX PREFIX
 
-all:
-	make -C vasm PREFIX=$(PREFIX)
-	make -C gnu PREFIX=$(PREFIX)
-	make -C elf2hunk PREFIX=$(PREFIX)
-	make -C fs-uae PREFIX=$(PREFIX)
+all: build-vasm build-gnu build-elf2hunk build-fs-uae
+
+build-vasm:
+	$(MAKE) -C vasm
+
+build-gnu:
+	$(MAKE) -C gnu
+
+build-elf2hunk:
+	$(MAKE) -C elf2hunk
+
+build-fs-uae:
+	$(MAKE) -C fs-uae
 
 download:
-	make -C vasm download
-	make -C gnu download
-	make -C elf2hunk download
-	make -C fs-uae download
+	$(MAKE) -C vasm download
+	$(MAKE) -C gnu download
+	$(MAKE) -C elf2hunk download
+	$(MAKE) -C fs-uae download
 
 clean:
-	make -C vasm clean
-	make -C gnu clean
-	make -C elf2hunk clean
-	make -C fs-uae clean
+	$(MAKE) -C vasm clean
+	$(MAKE) -C gnu clean
+	$(MAKE) -C elf2hunk clean
+	$(MAKE) -C fs-uae clean
 
-.PHONY: all download clean
+.PHONY: all build-vasm build-gnu build-elf2hunk build-fs-uae download clean

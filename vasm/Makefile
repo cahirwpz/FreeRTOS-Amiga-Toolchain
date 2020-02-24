@@ -62,6 +62,7 @@ ndk-install: ndk
 	mkdir -p "$(PREFIX)/$(TARGET)"
 	rm -rf "$(PREFIX)/$(TARGET)/include"
 	cp -r "ndk/Include/include_i" "$(PREFIX)/$(TARGET)/include" 
+	find "$(PREFIX)/$(TARGET)/include" -type f | xargs chmod 644
 
 ndk-clean:
 	$(RM) -r ndk

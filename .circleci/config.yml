@@ -29,9 +29,9 @@ jobs:
             - gnu/gcc-*.tar.xz
             - gnu/gdb-*.tar.xz
       - run: 'make PREFIX=/opt/FreeRTOS-Amiga'
-      - run: 'tar cvzf /FreeRTOS-Amiga-Toolchain.tar.gz /opt/FreeRTOS-Amiga'
+      - run: 'tar cJf /FreeRTOS-Amiga-Toolchain.tar.xz /opt/FreeRTOS-Amiga'
       - store_artifacts:
-          path: /FreeRTOS-Amiga-Toolchain.tar.gz
+          path: /FreeRTOS-Amiga-Toolchain.tar.xz
 
 workflows:
   version: 2

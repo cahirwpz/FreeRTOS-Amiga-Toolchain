@@ -2,8 +2,7 @@ CURL = curl -L
 RM = rm -f
 INSTALL = install
 
-CC = gcc -g
-CFLAGS = -O2 -Wall
+CFLAGS ?= -O2 -Wall
 
 PREFIX ?= $(PWD)/local
 
@@ -24,7 +23,7 @@ elf2hunk-unpatch: .pc/applied-patches
 elf2hunk-build: elf2hunk-patch elf2hunk
 
 elf2hunk-install: elf2hunk-build
-	$(INSTALL) -m 755 elf2hunk $(PREFIX)/bin
+	$(INSTALL) -s -m 755 elf2hunk $(PREFIX)/bin
 
 clean: elf2hunk-unpatch
 	$(RM) elf2hunk *~

@@ -1,10 +1,9 @@
 CURL = curl -L
 RM = rm -f
-INSTALL = install
 
-CC = gcc -g
-CFLAGS = -O2 -Wall
+# MAKEFLAGS = -j$(shell nproc)
 
+CFLAGS ?= -O2 -Wall
 PREFIX ?= $(PWD)/local
 GETTEXT_PATH = $(wildcard /usr/local/Cellar/gettext/*)
 
