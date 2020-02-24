@@ -255,7 +255,7 @@ $(GDB)/.unpack: $(GDB).tar.xz
 	touch $@
 
 gdb-configure: $(GDB)/.configure
-$(GDB)/.configure: $(GDB)/.unpack libs-install
+$(GDB)/.configure: $(GDB)/.unpack $(GCC)/.install libs-install
 	cd $(GDB) && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET)\
 		--with-isl=$(HOSTDIR) \
