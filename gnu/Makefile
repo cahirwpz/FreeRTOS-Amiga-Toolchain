@@ -22,8 +22,7 @@ clean: gmp-clean mpfr-clean mpc-clean isl-clean binutils-clean gcc-clean gdb-cle
 	$(RM) -r host
 	$(RM) *~
 
-download: $(GMP).tar.xz $(MPFR).tar.xz $(MPC).tar.gz $(ISL).tar.xz \
-	  $(BINUTILS).tar.xz $(GCC).tar.xz $(GDB).tar.xz
+unpack: gmp-unpack mpfr-unpack mpc-unpack isl-unpack binutils-unpack gcc-unpack gdb-unpack
 
 .PHONY: all clean download
 
@@ -32,29 +31,30 @@ download: $(GMP).tar.xz $(MPFR).tar.xz $(MPC).tar.gz $(ISL).tar.xz \
 $(GMP).tar.xz:
 	$(CURL) -o $@ "https://gmplib.org/download/gmp/$(GMP).tar.xz"
 
-gmp-unpack: $(GMP)/.unpack
-$(GMP)/.unpack: $(GMP).tar.xz
+gmp-unpack: gmp/.unpack
+gmp/.unpack: $(GMP).tar.xz
 	tar xJf $^
+	mv $(GMP) gmp
 	touch $@
 
-gmp-configure: $(GMP)/.configure
-$(GMP)/.configure: $(GMP)/.unpack
-	cd $(GMP) && ./configure \
+gmp-configure: gmp/.configure
+gmp/.configure: gmp/.unpack
+	cd gmp && ./configure \
 		--disable-shared --prefix=$(HOSTDIR)
 	touch $@
 
-gmp-build: $(GMP)/.build
-$(GMP)/.build: $(GMP)/.configure
-	cd $(GMP) && $(MAKE)
+gmp-build: gmp/.build
+gmp/.build: gmp/.configure
+	cd gmp && $(MAKE)
 	touch $@
 
-gmp-install: $(GMP)/.install
-$(GMP)/.install: $(GMP)/.build
-	cd $(GMP) && $(MAKE) install
+gmp-install: gmp/.install
+gmp/.install: gmp/.build
+	cd gmp && $(MAKE) install
 	touch $@
 
 gmp-clean:
-	$(RM) -r $(GMP)
+	$(RM) -r gmp
 
 .PHONY: gmp-unpack gmp-configure gmp-build gmp-install gmp-clean
 
@@ -63,29 +63,30 @@ gmp-clean:
 $(MPFR).tar.xz:
 	$(CURL) -o $@ "https://www.mpfr.org/mpfr-current/$(MPFR).tar.xz"
 
-mpfr-unpack: $(MPFR)/.unpack
-$(MPFR)/.unpack: $(MPFR).tar.xz
+mpfr-unpack: mpfr/.unpack
+mpfr/.unpack: $(MPFR).tar.xz
 	tar xJf $^
+	mv $(MPFR) mpfr
 	touch $@
 
-mpfr-configure: $(MPFR)/.configure
-$(MPFR)/.configure: $(MPFR)/.unpack $(GMP)/.install
-	cd $(MPFR) && ./configure \
+mpfr-configure: mpfr/.configure
+mpfr/.configure: mpfr/.unpack gmp/.install
+	cd mpfr && ./configure \
 		--disable-shared --prefix=$(HOSTDIR) --with-gmp=$(HOSTDIR)
 	touch $@
 
-mpfr-build: $(MPFR)/.build
-$(MPFR)/.build: $(MPFR)/.configure
-	cd $(MPFR) && $(MAKE)
+mpfr-build: mpfr/.build
+mpfr/.build: mpfr/.configure
+	cd mpfr && $(MAKE)
 	touch $@
 
-mpfr-install: $(MPFR)/.install
-$(MPFR)/.install: $(MPFR)/.build
-	cd $(MPFR) && $(MAKE) install
+mpfr-install: mpfr/.install
+mpfr/.install: mpfr/.build
+	cd mpfr && $(MAKE) install
 	touch $@
 
 mpfr-clean:
-	$(RM) -r $(MPFR)
+	$(RM) -r mpfr
 
 .PHONY: mpfr-unpack mpfr-configure mpfr-build mpfr-install mpfr-clean
 
@@ -94,32 +95,33 @@ mpfr-clean:
 $(MPC).tar.gz:
 	$(CURL) -o $@ "https://ftp.gnu.org/gnu/mpc/$(MPC).tar.gz"
 
-mpc-unpack: $(MPC)/.unpack
-$(MPC)/.unpack: $(MPC).tar.gz
+mpc-unpack: mpc/.unpack
+mpc/.unpack: $(MPC).tar.gz
 	tar xzf $^
+	mv $(MPC) mpc
 	touch $@
 
-mpc-configure: $(MPC)/.configure
-$(MPC)/.configure: $(MPC)/.unpack $(GMP)/.install $(MPFR)/.install
-	cd $(MPC) && ./configure \
+mpc-configure: mpc/.configure
+mpc/.configure: mpc/.unpack gmp/.install mpfr/.install
+	cd mpc && ./configure \
 		--disable-shared \
 		--prefix=$(HOSTDIR) \
 		--with-gmp=$(HOSTDIR) \
 		--with-mpfr=$(HOSTDIR)
 	touch $@
 
-mpc-build: $(MPC)/.build
-$(MPC)/.build: $(MPC)/.configure
-	cd $(MPC) && $(MAKE)
+mpc-build: mpc/.build
+mpc/.build: mpc/.configure
+	cd mpc && $(MAKE)
 	touch $@
 
-mpc-install: $(MPC)/.install
-$(MPC)/.install: $(MPC)/.build
-	cd $(MPC) && $(MAKE) install
+mpc-install: mpc/.install
+mpc/.install: mpc/.build
+	cd mpc && $(MAKE) install
 	touch $@
 
 mpc-clean:
-	$(RM) -r $(MPC)
+	$(RM) -r mpc
 
 .PHONY: mpc-unpack mpc-configure mpc-build mpc-install mpc-clean
 
@@ -128,38 +130,38 @@ mpc-clean:
 $(ISL).tar.xz:
 	$(CURL) -o $@ "http://isl.gforge.inria.fr/$(ISL).tar.xz"
 
-isl-unpack: $(ISL)/.unpack
-$(ISL)/.unpack: $(ISL).tar.xz
+isl-unpack: isl/.unpack
+isl/.unpack: $(ISL).tar.xz
 	tar xJf $^
+	mv $(ISL) isl
 	touch $@
 
-isl-configure: $(ISL)/.configure
-$(ISL)/.configure: $(ISL)/.unpack $(GMP)/.install
-	cd $(ISL) && ./configure \
+isl-configure: isl/.configure
+isl/.configure: isl/.unpack gmp/.install
+	cd isl && ./configure \
 		--disable-shared \
 		--prefix=$(HOSTDIR) \
 		--with-gmp-prefix=$(HOSTDIR)
 	touch $@
 
-isl-build: $(ISL)/.build
-$(ISL)/.build: $(ISL)/.configure
-	cd $(ISL) && $(MAKE)
+isl-build: isl/.build
+isl/.build: isl/.configure
+	cd isl && $(MAKE)
 	touch $@
 
-isl-install: $(ISL)/.install
-$(ISL)/.install: $(ISL)/.build
-	cd $(ISL) && $(MAKE) install
+isl-install: isl/.install
+isl/.install: isl/.build
+	cd isl && $(MAKE) install
 	touch $@
 
 isl-clean:
-	$(RM) -r $(ISL)
+	$(RM) -r isl
 
 .PHONY: isl-unpack isl-configure isl-build isl-install isl-clean
 
 ### Joint rule for all requisite libraries
 
-libs-install: $(GMP)/.install $(MPFR)/.install $(MPC)/.install \
-	      $(ISL)/.install $(MPC)/.install
+libs-install: gmp/.install mpfr/.install mpc/.install isl/.install
 
 .PHONY: libs-install
 
@@ -168,14 +170,15 @@ libs-install: $(GMP)/.install $(MPFR)/.install $(MPC)/.install \
 $(BINUTILS).tar.xz:
 	$(CURL) -o $@ "https://ftp.gnu.org/gnu/binutils/$(BINUTILS).tar.xz"
 
-binutils-unpack: $(BINUTILS)/.unpack
-$(BINUTILS)/.unpack: $(BINUTILS).tar.xz
+binutils-unpack: binutils/.unpack
+binutils/.unpack: $(BINUTILS).tar.xz
 	tar xJf $^
+	mv $(BINUTILS) binutils
 	touch $@
 
-binutils-configure: $(BINUTILS)/.configure
-$(BINUTILS)/.configure: $(BINUTILS)/.unpack libs-install
-	cd $(BINUTILS) && ./configure \
+binutils-configure: binutils/.configure
+binutils/.configure: binutils/.unpack libs-install
+	cd binutils && ./configure \
 		--target=$(TARGET) \
 		--disable-nls \
 		--prefix=$(PREFIX) \
@@ -185,18 +188,18 @@ $(BINUTILS)/.configure: $(BINUTILS)/.unpack libs-install
 		--with-isl=$(HOSTDIR)
 	touch $@
 
-binutils-build: $(BINUTILS)/.build
-$(BINUTILS)/.build: $(BINUTILS)/.configure
-	cd $(BINUTILS) && $(MAKE)
+binutils-build: binutils/.build
+binutils/.build: binutils/.configure
+	cd binutils && $(MAKE)
 	touch $@
 
-binutils-install: $(BINUTILS)/.install
-$(BINUTILS)/.install: $(BINUTILS)/.build
-	cd $(BINUTILS) && $(MAKE) install
+binutils-install: binutils/.install
+binutils/.install: binutils/.build
+	cd binutils && $(MAKE) install
 	touch $@
 
 binutils-clean:
-	$(RM) -r $(BINUTILS)
+	$(RM) -r binutils
 
 .PHONY: binutils-unpack binutils-configure binutils-build binutils-install binutils-clean
 
@@ -205,14 +208,15 @@ binutils-clean:
 $(GCC).tar.xz:
 	$(CURL) -o $@ "https://ftp.gnu.org/gnu/gcc/$(GCC)/$(GCC).tar.xz"
 
-gcc-unpack: $(GCC)/.unpack
-$(GCC)/.unpack: $(GCC).tar.xz
+gcc-unpack: gcc/.unpack
+gcc/.unpack: $(GCC).tar.xz
 	tar xJf $^
+	mv $(GCC) gcc
 	touch $@
 
-gcc-configure: $(GCC)/.configure
-$(GCC)/.configure: $(GCC)/.unpack $(BINUTILS)/.install libs-install
-	cd $(GCC) && PATH=$(PREFIX)/bin:$$PATH ./configure \
+gcc-configure: gcc/.configure
+gcc/.configure: gcc/.unpack binutils/.install libs-install
+	cd gcc && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET) \
 		--prefix=$(PREFIX) \
 		--datarootdir=$(PREFIX)/$(TARGET)/share \
@@ -229,18 +233,18 @@ $(GCC)/.configure: $(GCC)/.unpack $(BINUTILS)/.install libs-install
             	--disable-werror
 	touch $@
 
-gcc-build: $(GCC)/.build
-$(GCC)/.build: $(GCC)/.configure
-	cd $(GCC) && $(MAKE) all-gcc
+gcc-build: gcc/.build
+gcc/.build: gcc/.configure
+	cd gcc && $(MAKE) all-gcc
 	touch $@
 
-gcc-install: $(GCC)/.install
-$(GCC)/.install: $(GCC)/.build
-	cd $(GCC) && $(MAKE) install-gcc
+gcc-install: gcc/.install
+gcc/.install: gcc/.build
+	cd gcc && $(MAKE) install-gcc
 	touch $@
 
 gcc-clean:
-	$(RM) -r $(GCC)
+	$(RM) -r gcc
 
 .PHONY: gcc-unpack gcc-configure gcc-build gcc-install gcc-clean
 
@@ -249,14 +253,15 @@ gcc-clean:
 $(GDB).tar.xz:
 	$(CURL) -o $@ "https://ftp.gnu.org/gnu/gdb/$(GDB).tar.xz"
 
-gdb-unpack: $(GDB)/.unpack
-$(GDB)/.unpack: $(GDB).tar.xz
+gdb-unpack: gdb/.unpack
+gdb/.unpack: $(GDB).tar.xz
 	tar xJf $^
+	mv $(GDB) gdb
 	touch $@
 
-gdb-configure: $(GDB)/.configure
-$(GDB)/.configure: $(GDB)/.unpack $(GCC)/.install libs-install
-	cd $(GDB) && PATH=$(PREFIX)/bin:$$PATH ./configure \
+gdb-configure: gdb/.configure
+gdb/.configure: gdb/.unpack gcc/.install libs-install
+	cd gdb && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET)\
 		--with-isl=$(HOSTDIR) \
 		--prefix=$(PREFIX) \
@@ -272,17 +277,17 @@ $(GDB)/.configure: $(GDB)/.unpack $(GCC)/.install libs-install
 		--with-python=$(shell which python3)
 	touch $@
 
-gdb-build: $(GDB)/.build
-$(GDB)/.build: $(GDB)/.configure
-	cd $(GDB) && $(MAKE)
+gdb-build: gdb/.build
+gdb/.build: gdb/.configure
+	cd gdb && $(MAKE)
 	touch $@
 
-gdb-install: $(GDB)/.install
-$(GDB)/.install: $(GDB)/.build
-	cd $(GDB) && $(MAKE) install
+gdb-install: gdb/.install
+gdb/.install: gdb/.build
+	cd gdb && $(MAKE) install
 	touch $@
 
 gdb-clean:
-	$(RM) -r $(GDB)
+	$(RM) -r gdb
 
 .PHONY: gdb-unpack gdb-configure gdb-build gdb-install gdb-clean

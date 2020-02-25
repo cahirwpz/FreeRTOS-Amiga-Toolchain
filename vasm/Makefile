@@ -12,7 +12,7 @@ all: vasm-install ndk-install
 clean: vasm-clean ndk-clean
 	$(RM) *~
 
-download: vasm.tar.gz $(NDK).lha
+unpack: vasm-unpack ndk-unpack
 
 .PHONY: all clean download
 
@@ -27,11 +27,18 @@ download: vasm.tar.gz $(NDK).lha
 vasm.tar.gz:
 	$(CURL) -o $@ "http://server.owl.de/~frank/tags/$(VASM).tar.gz"
 
-vasm-build: vasm/vasmm68k_mot vasm/vobjdump
-vasm/vasmm68k_mot vasm/vobjdump: vasm
-	make -C vasm CPU=m68k SYNTAX=mot
+vasm-unpack: vasm/.unpack
+vasm/.unpack: vasm.tar.gz
+	tar xvzf $^
+	touch $@
 
-vasm-install: vasm-build
+vasm-build: vasm/.build
+vasm/.build: vasm/.unpack
+	make -C vasm CPU=m68k SYNTAX=mot
+	touch $@
+
+vasm-install: vasm/.install
+vasm/.install: vasm/.build
 	mkdir -p "$(PREFIX)/$(TARGET)/bin"
 	mkdir -p "$(PREFIX)/bin"
 	cp "vasm/vasmm68k_mot" "$(PREFIX)/$(TARGET)/bin"
@@ -42,23 +49,27 @@ vasm-install: vasm-build
 	     "-I$(PREFIX)/$(TARGET)/ndk/include \"\$$@\"" \
 		>> "$(PREFIX)/bin/vasm"
 	chmod a+x $(PREFIX)/bin/vasm
+	touch $@
 
 vasm-clean:
 	$(RM) -r vasm
-	$(RM) vasm.tar.gz
+
+.PHONY: vasm-unpack vasm-build vasm-install vasm-clean
 
 ### NDK
 
 $(NDK).lha:
 	$(CURL) -o $@ "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
 
-ndk: $(NDK).lha
-	lha x $^
-	$(RM) $(NDK).info
+ndk-unpack: ndk/.unpack
+ndk/.unpack: $(NDK).lha
+	lha xf $^
+	$(RM) -r $(NDK).info ndk_3.9
 	mv $(NDK) ndk
 	touch $@
 
-ndk-install: ndk
+ndk-install: ndk/.install
+ndk/.install: ndk/.unpack
 	mkdir -p "$(PREFIX)/$(TARGET)"
 	rm -rf "$(PREFIX)/$(TARGET)/include"
 	cp -r "ndk/Include/include_i" "$(PREFIX)/$(TARGET)/include" 
@@ -66,8 +77,5 @@ ndk-install: ndk
 
 ndk-clean:
 	$(RM) -r ndk
-	$(RM) $(NDK).lha
 
-### other stuff
-
-.PHONY: vasm-build vasm-install ndk-install vasm-clean ndk-clean
+.PHONY: ndk-unpack ndk-install ndk-clean

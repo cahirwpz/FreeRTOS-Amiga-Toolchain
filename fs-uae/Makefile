@@ -16,6 +16,7 @@ download: fs-uae-$(VER).tar.gz
 fs-uae-$(VER).tar.gz:
 	$(CURL) -o $@ "https://fs-uae.net/stable/$(VER)/fs-uae-$(VER).tar.gz"
 
+unpack: fs-uae/.unpack
 fs-uae/.unpack: fs-uae-$(VER).tar.gz
 	tar xvzf $^
 	mv fs-uae-$(VER) fs-uae
@@ -68,8 +69,7 @@ force-build:
 	$(MAKE) install
 
 clean:
-	cd fs-uae && rm -f .install .build .configure
-	-$(MAKE) -C fs-uae clean
 	-quilt pop -a
+	$(RM) -r fs-uae
 
-.PHONY: patch configure build install force-build download
+.PHONY: unpack patch configure build install force-build download

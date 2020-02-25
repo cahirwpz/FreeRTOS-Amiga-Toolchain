@@ -1,5 +1,2 @@
-*.lha
-*.tar.gz
 vasm
-ndk_3.9
-NDK_3.9*
+ndk

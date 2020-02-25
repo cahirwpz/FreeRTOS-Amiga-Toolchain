@@ -18,11 +18,11 @@ build-elf2hunk:
 build-fs-uae:
 	$(MAKE) -C fs-uae
 
-download:
-	$(MAKE) -C vasm download
-	$(MAKE) -C gnu download
+unpack:
+	$(MAKE) -C vasm unpack
+	$(MAKE) -C gnu unpack
 	$(MAKE) -C elf2hunk download
-	$(MAKE) -C fs-uae download
+	$(MAKE) -C fs-uae unpack
 
 clean:
 	$(MAKE) -C vasm clean
