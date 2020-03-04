@@ -11,7 +11,7 @@ all: elf2hunk-install
 download: elf2hunk.c
 
 elf2hunk.c:
-	$(CURL) -o $@ "https://repo.or.cz/AROS.git/blob_plain/HEAD:/tools/elf2hunk/elf2hunk.c"
+	$(CURL) -o $@ "https://raw.githubusercontent.com/aros-development-team/AROS/master/tools/elf2hunk/elf2hunk.c"
 
 elf2hunk-patch: .pc/applied-patches
 .pc/applied-patches: elf2hunk.c

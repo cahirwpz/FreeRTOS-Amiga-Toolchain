@@ -1,5 +1,6 @@
 CURL = curl -L
 RM = rm -f
+LHA = lhasa
 
 VASM = vasm1_8g
 NDK = NDK_3.9
@@ -16,12 +17,6 @@ unpack: vasm-unpack ndk-unpack
 
 .PHONY: all clean download
 
-### recipes
-
-%: %.tar.gz
-	tar xvzf $^
-	touch $@
-
 ### VASM
 
 vasm.tar.gz:
@@ -34,7 +29,7 @@ vasm/.unpack: vasm.tar.gz
 
 vasm-build: vasm/.build
 vasm/.build: vasm/.unpack
-	make -C vasm CPU=m68k SYNTAX=mot
+	$(MAKE) -C vasm CPU=m68k SYNTAX=mot
 	touch $@
 
 vasm-install: vasm/.install
@@ -63,7 +58,7 @@ $(NDK).lha:
 
 ndk-unpack: ndk/.unpack
 ndk/.unpack: $(NDK).lha
-	lha xf $^
+	$(LHA) xf $^
 	$(RM) -r $(NDK).info ndk_3.9
 	mv $(NDK) ndk
 	touch $@

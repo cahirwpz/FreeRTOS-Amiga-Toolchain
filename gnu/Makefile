@@ -1,7 +1,11 @@
 CURL = curl -L
 RM = rm -f
 
+ifeq ($(shell uname),FreeBSD)
+MAKEFLAGS = -j$(shell sysctl -n hw.ncpu)
+else
 MAKEFLAGS = -j$(shell nproc)
+endif
 
 ISL = isl-0.21
 MPFR = mpfr-4.0.2
@@ -161,9 +165,7 @@ isl-clean:
 
 ### Joint rule for all requisite libraries
 
-libs-install: gmp/.install mpfr/.install mpc/.install isl/.install
-
-.PHONY: libs-install
+LIBRARIES = gmp/.install mpfr/.install mpc/.install isl/.install
 
 ### GNU Binutils
 
@@ -177,7 +179,7 @@ binutils/.unpack: $(BINUTILS).tar.xz
 	touch $@
 
 binutils-configure: binutils/.configure
-binutils/.configure: binutils/.unpack libs-install
+binutils/.configure: binutils/.unpack $(LIBRARIES)
 	cd binutils && ./configure \
 		--target=$(TARGET) \
 		--disable-nls \
@@ -215,7 +217,7 @@ gcc/.unpack: $(GCC).tar.xz
 	touch $@
 
 gcc-configure: gcc/.configure
-gcc/.configure: gcc/.unpack binutils/.install libs-install
+gcc/.configure: gcc/.unpack binutils/.install $(LIBRARIES)
 	cd gcc && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET) \
 		--prefix=$(PREFIX) \
@@ -260,7 +262,7 @@ gdb/.unpack: $(GDB).tar.xz
 	touch $@
 
 gdb-configure: gdb/.configure
-gdb/.configure: gdb/.unpack gcc/.install libs-install
+gdb/.configure: gdb/.unpack gcc/.install $(LIBRARIES)
 	cd gdb && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET)\
 		--with-isl=$(HOSTDIR) \
@@ -273,6 +275,7 @@ gdb/.configure: gdb/.unpack gcc/.install libs-install
             	--disable-nls \
 		--disable-sim \
 		--disable-werror \
+		--disable-source-highlight \
 		--with-tui \
 		--with-python=$(shell which python3)
 	touch $@

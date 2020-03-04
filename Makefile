@@ -1,5 +1,10 @@
-CC = gcc -s
-CXX = g++ -s
+ifeq ($(shell uname),FreeBSD)
+CC = gcc9
+CXX = g++9
+else
+CC = gcc
+CXX = g++
+endif
 PREFIX ?= $(PWD)/local
 
 export CC CXX PREFIX
