@@ -2,7 +2,7 @@ Index: elf2hunk/elf2hunk.c
 ===================================================================
 --- elf2hunk.orig/elf2hunk.c
 +++ elf2hunk/elf2hunk.c
-@@ -880,7 +880,7 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -881,7 +881,7 @@ int elf2hunk(int file, int hunk_fd, cons
      	if (hh[i]==NULL || hh[i]->hunk < 0)
      	    continue;
  
@@ -11,7 +11,7 @@ Index: elf2hunk/elf2hunk.c
      	switch (hh[i]->memflags) {
      	case MEMF_CHIP:
      	    count |= HUNKF_CHIP;
-@@ -895,7 +895,7 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -896,7 +896,7 @@ int elf2hunk(int file, int hunk_fd, cons
      	    break;
      	}
  
@@ -20,7 +20,7 @@ Index: elf2hunk/elf2hunk.c
      	wlong(hunk_fd, count);
  
      	if ((count & HUNKF_MEMFLAGS) == HUNKF_MEMFLAGS)
-@@ -910,11 +910,11 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -911,11 +911,11 @@ int elf2hunk(int file, int hunk_fd, cons
      	    continue;
  
      	wlong(hunk_fd, hh[i]->type);
@@ -34,7 +34,7 @@ Index: elf2hunk/elf2hunk.c
            if (cmdline_flags & F_SYMBOLS) {
                for (s = 0; s < int_shnum; s++) {
                    if (hh[s] && hh[s]->type == HUNK_SYMBOL)
-@@ -927,8 +927,8 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -928,8 +928,8 @@ int elf2hunk(int file, int hunk_fd, cons
      	    break;
      	case HUNK_CODE:
      	case HUNK_DATA:

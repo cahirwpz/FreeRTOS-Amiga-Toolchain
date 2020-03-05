@@ -4,7 +4,7 @@ Index: elf2hunk/elf2hunk.c
 +++ elf2hunk/elf2hunk.c
 @@ -1,6 +1,8 @@
  /*
-     Copyright © 1995-2017, The AROS Development Team. All rights reserved.
+     Copyright © 1995-2019, The AROS Development Team. All rights reserved.
      $Id$
 +
 +    Modified by Krystian Baclawski to support executable files with relocs.
@@ -62,7 +62,7 @@ Index: elf2hunk/elf2hunk.c
          }
          hrel->shid = shid;
          hrel->offset = offset;
-@@ -1093,3 +1099,5 @@ int main(int argc, char **argv)
+@@ -1094,3 +1100,5 @@ int main(int argc, char **argv)
  
      return copy(argv[1], argv[2], flags);
  }

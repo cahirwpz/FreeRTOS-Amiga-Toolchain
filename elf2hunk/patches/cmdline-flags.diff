@@ -29,7 +29,7 @@ Index: elf2hunk/elf2hunk.c
  
  static int must_swap = -1;
  
-@@ -906,7 +904,7 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -907,7 +905,7 @@ int elf2hunk(int file, int hunk_fd, cons
  
      /* Write all hunks */
      for (i = hunks = 0; i < int_shnum; i++) {
@@ -38,7 +38,7 @@ Index: elf2hunk/elf2hunk.c
  
      	if (hh[i]==NULL || hh[i]->hunk < 0)
      	    continue;
-@@ -916,13 +914,13 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -917,13 +915,13 @@ int elf2hunk(int file, int hunk_fd, cons
  
      	switch (hh[i]->type) {
      	case HUNK_BSS:
@@ -59,7 +59,7 @@ Index: elf2hunk/elf2hunk.c
  
      	    wlong(hunk_fd, HUNK_END);
      	    hunks++;
-@@ -933,12 +931,12 @@ int elf2hunk(int file, int hunk_fd, cons
+@@ -934,12 +932,12 @@ int elf2hunk(int file, int hunk_fd, cons
      	    err = write(hunk_fd, hh[i]->data, ((hh[i]->size + 4)/4)*4);
      	    if (err < 0)
      	    	return EXIT_FAILURE;
@@ -78,7 +78,7 @@ Index: elf2hunk/elf2hunk.c
      	    reloc_dump(hunk_fd, hh, i);
      	    wlong(hunk_fd, HUNK_END);
      	    D(bug("\tHUNK_END\n"));
-@@ -1039,7 +1037,7 @@ static int copy(const char *src, const c
+@@ -1040,7 +1038,7 @@ static int copy(const char *src, const c
      int mode, ret;
  
      if (flags & F_VERBOSE)
@@ -87,7 +87,7 @@ Index: elf2hunk/elf2hunk.c
  
      if (stat(src, &st) >= 0) {
          mode = st.st_mode;
-@@ -1081,23 +1079,35 @@ static int copy(const char *src, const c
+@@ -1082,23 +1080,35 @@ static int copy(const char *src, const c
      return ret;
  }
  
