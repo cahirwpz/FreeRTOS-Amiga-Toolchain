@@ -59,8 +59,8 @@ $(NDK).lha:
 ndk-unpack: ndk/.unpack
 ndk/.unpack: $(NDK).lha
 	$(LHA) xf $^
-	$(RM) -r $(NDK).info ndk_3.9
 	mv $(NDK) ndk
+	$(RM) -r $(NDK).info ndk_3.9
 	touch $@
 
 ndk-install: ndk/.install

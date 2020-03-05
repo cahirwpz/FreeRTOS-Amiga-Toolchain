@@ -183,11 +183,14 @@ binutils/.configure: binutils/.unpack $(LIBRARIES)
 	cd binutils && ./configure \
 		--target=$(TARGET) \
 		--disable-nls \
+		--disable-plugins \
+                --disable-werror \
 		--prefix=$(PREFIX) \
 		--with-gmp=$(HOSTDIR) \
 		--with-mpfr=$(HOSTDIR) \
 		--with-mpc=$(HOSTDIR) \
-		--with-isl=$(HOSTDIR)
+		--with-isl=$(HOSTDIR) \
+                --with-python=$(shell which python3)
 	touch $@
 
 binutils-build: binutils/.build

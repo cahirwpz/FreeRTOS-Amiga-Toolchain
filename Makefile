@@ -1,10 +1,14 @@
 ifeq ($(shell uname),FreeBSD)
 CC = gcc9
 CXX = g++9
+else ifeq ($(shell uname),Darwin)
+CC = clang
+CXX = clang++
 else
 CC = gcc
 CXX = g++
 endif
+
 PREFIX ?= $(PWD)/local
 
 export CC CXX PREFIX
