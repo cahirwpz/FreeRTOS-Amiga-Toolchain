@@ -54,7 +54,7 @@ gmp/.build: gmp/.configure
 
 gmp-install: gmp/.install
 gmp/.install: gmp/.build
-	cd gmp && $(MAKE) install
+	cd gmp && $(MAKE) install-strip
 	touch $@
 
 gmp-clean:
@@ -86,7 +86,7 @@ mpfr/.build: mpfr/.configure
 
 mpfr-install: mpfr/.install
 mpfr/.install: mpfr/.build
-	cd mpfr && $(MAKE) install
+	cd mpfr && $(MAKE) install-strip
 	touch $@
 
 mpfr-clean:
@@ -121,7 +121,7 @@ mpc/.build: mpc/.configure
 
 mpc-install: mpc/.install
 mpc/.install: mpc/.build
-	cd mpc && $(MAKE) install
+	cd mpc && $(MAKE) install-strip
 	touch $@
 
 mpc-clean:
@@ -155,7 +155,7 @@ isl/.build: isl/.configure
 
 isl-install: isl/.install
 isl/.install: isl/.build
-	cd isl && $(MAKE) install
+	cd isl && $(MAKE) install-strip
 	touch $@
 
 isl-clean:
@@ -163,7 +163,7 @@ isl-clean:
 
 .PHONY: isl-unpack isl-configure isl-build isl-install isl-clean
 
-### Joint rule for all requisite libraries
+### List of all requisite libraries
 
 LIBRARIES = gmp/.install mpfr/.install mpc/.install isl/.install
 
@@ -200,7 +200,7 @@ binutils/.build: binutils/.configure
 
 binutils-install: binutils/.install
 binutils/.install: binutils/.build
-	cd binutils && $(MAKE) install
+	cd binutils && $(MAKE) install-strip
 	touch $@
 
 binutils-clean:
@@ -245,7 +245,7 @@ gcc/.build: gcc/.configure
 
 gcc-install: gcc/.install
 gcc/.install: gcc/.build
-	cd gcc && $(MAKE) install-gcc
+	cd gcc && $(MAKE) install-strip-gcc
 	touch $@
 
 gcc-clean:
@@ -290,7 +290,7 @@ gdb/.build: gdb/.configure
 
 gdb-install: gdb/.install
 gdb/.install: gdb/.build
-	cd gdb && $(MAKE) install
+	cd gdb && $(MAKE) install-strip-gdb
 	touch $@
 
 gdb-clean:

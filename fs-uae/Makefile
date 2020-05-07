@@ -61,7 +61,7 @@ fs-uae/.build: fs-uae/.configure
 
 install: fs-uae/.install
 fs-uae/.install: fs-uae/.build
-	cd fs-uae && $(MAKE) install
+	cd fs-uae && $(MAKE) install-strip
 	touch $@
 
 force-build:
