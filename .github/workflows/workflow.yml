@@ -1,6 +1,6 @@
 name: FreeRTOS Toolchain
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -28,12 +28,17 @@ jobs:
           - gnu/gdb
         key: 20200726-1
 
+    - name: Unpack toolchain
+      run: make unpack
+
     - name: Build toolchain
-      run: |
-        make PREFIX=/opt/FreeRTOS-Amiga
+      run: make PREFIX=/opt/FreeRTOS-Amiga
 
     - name: Archive toolchain
+      run: tar cJf FreeRTOS-Amiga-Toolchain.tar.xz /opt/FreeRTOS-Amiga
+
+    - name: Upload toolchain
       uses: actions/upload-artifact@v2
       with:
-        name: FreeRTOS-Amiga
-        path: /opt/FreeRTOS-Amiga
+        name: FreeRTOS-Amiga-Toolchain
+        path: FreeRTOS-Amiga-Toolchain.tar.xz
