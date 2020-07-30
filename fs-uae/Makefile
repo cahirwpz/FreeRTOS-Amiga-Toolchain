@@ -7,7 +7,7 @@ CFLAGS ?= -O2 -Wall
 PREFIX ?= $(PWD)/local
 GETTEXT_PATH = $(wildcard /usr/local/Cellar/gettext/*)
 
-VER = 3.0.0
+VER = 3.0.5
 
 all: install
 
