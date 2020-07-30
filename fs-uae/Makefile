@@ -32,7 +32,6 @@ fs-uae/.configure: .pc/applied-patches
 		--prefix=$(PREFIX) \
 		--enable-gdbstub \
 		--without-libmpeg2 \
-		--disable-a2065 \
 		--disable-action-replay \
 		--disable-ahi \
 		--disable-arcadia \
@@ -44,7 +43,6 @@ fs-uae/.configure: .pc/applied-patches
 		--disable-pearpc-cpu \
 		--disable-ppc \
 		--disable-prowizard \
-		--disable-slirp \
 		--disable-qemu-cpu \
 		--disable-qemu-slirp \
 		--disable-uaenet \
