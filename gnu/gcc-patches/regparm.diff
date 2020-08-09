@@ -1,0 +1,196 @@
+Index: gnu/gcc/gcc/common.opt
+===================================================================
+--- gnu.orig/gcc/gcc/common.opt
++++ gnu/gcc/gcc/common.opt
+@@ -701,6 +701,9 @@ Warn when one local variable shadows ano
+ Wshadow-compatible-local
+ Common Warning Undocumented Alias(Wshadow=compatible-local)
+ 
++Wsibcall-disabled
++Common Warning Undocumented
++
+ Wstack-protector
+ Common Var(warn_stack_protect) Warning
+ Warn when not issuing stack smashing protection for some reason.
+Index: gnu/gcc/gcc/config/m68k/m68k-protos.h
+===================================================================
+--- gnu.orig/gcc/gcc/config/m68k/m68k-protos.h
++++ gnu/gcc/gcc/config/m68k/m68k-protos.h
+@@ -86,6 +86,8 @@ extern enum attr_op_mem m68k_sched_attr_
+ 
+ #endif /* RTX_CODE */
+ 
++extern void m68k_init_cumulative_args (CUMULATIVE_ARGS *, tree, rtx, tree, int);
++
+ extern enum reg_class m68k_secondary_reload_class (enum reg_class,
+ 						   machine_mode, rtx);
+ extern enum reg_class m68k_preferred_reload_class (rtx, enum reg_class);
+Index: gnu/gcc/gcc/config/m68k/m68k.c
+===================================================================
+--- gnu.orig/gcc/gcc/config/m68k/m68k.c
++++ gnu/gcc/gcc/config/m68k/m68k.c
+@@ -341,6 +341,54 @@ static machine_mode m68k_promote_functio
+ #undef TARGET_ATOMIC_TEST_AND_SET_TRUEVAL
+ #define TARGET_ATOMIC_TEST_AND_SET_TRUEVAL 128
+ 
++static tree m68k_handle_cconv_attribute
++(tree *node, tree name, tree args, int, bool *no_add_attrs) {
++    switch (TREE_CODE(*node)) {
++    default:
++	warning (OPT_Wattributes, "%qE attribute only applies to functions", name);
++	*no_add_attrs = true;
++	return NULL_TREE;
++    case FUNCTION_TYPE: case METHOD_TYPE: case FIELD_DECL: case TYPE_DECL:
++	if(is_attribute_p("aregparm", name)) {
++	    /* acceptance of a parameter involves *not* setting no_add_attrs */
++	    return NULL_TREE;
++	}
++	sorry("m68k_handle_cconv_attribute saw unexpected attribute %qE", name);
++    }
++}
++
++void m68k_init_cumulative_args (
++    CUMULATIVE_ARGS *cum,	/* Argument info to initialize */
++    tree fntype,		/* tree ptr for function decl */
++    rtx /* libname */,		/* SYMBOL_REF of library name or 0 */
++    tree /* fndecl */,
++    int /* caller */
++  ) {
++    memset(cum, 0, sizeof(*cum));
++
++    cum->bytes = 0;
++    cum->regparm_next = 0;
++    cum->regparm_count = 0;
++    cum->regparm_clobber = false;
++
++    //warning(OPT_Wall, "init_cumulative_args: fntype=%qE", fntype);
++    //debug_tree(fntype);
++
++    if(auto attr = lookup_attribute("aregparm", TYPE_ATTRIBUTES(fntype))) {
++	auto parms = TREE_VALUE(attr);
++	static char call_used_registers[] = CALL_USED_REGISTERS;
++	while(parms != NULL_TREE) {
++	    int nextreg = TREE_INT_CST_LOW(TREE_VALUE(parms));
++	    // If this register should be saved across function calls, we set the clobber flag.
++	    if(!call_used_registers[nextreg])
++		cum->regparm_clobber = true;
++	    //warning(OPT_Wattributes, "aregparm: %d", nextreg);
++	    cum->regparms[cum->regparm_count++] = nextreg;
++	    parms = TREE_CHAIN(parms);
++	}
++    }
++}
++
+ #undef TARGET_HARD_REGNO_NREGS
+ #define TARGET_HARD_REGNO_NREGS m68k_hard_regno_nregs
+ #undef TARGET_HARD_REGNO_MODE_OK
+@@ -362,6 +410,8 @@ static const struct attribute_spec m68k_
+     m68k_handle_fndecl_attribute, NULL },
+   { "interrupt_thread", 0, 0, true,  false, false, false,
+     m68k_handle_fndecl_attribute, NULL },
++  { "aregparm", 1, 16, false,  true, true, false,
++    m68k_handle_cconv_attribute, NULL },
+   { NULL, 0, 0, false, false, false, false, NULL, NULL }
+ };
+ 
+@@ -1439,6 +1489,29 @@ m68k_ok_for_sibcall_p (tree decl, tree e
+ 	return false;
+     }
+ 
++  //warning(OPT_Wall, "Dumping decl=%qE", decl); debug_tree(decl);
++  //warning(OPT_Wall, "Dumping exp=%qE", decl); debug_tree(exp);
++  //auto v = ...;
++  //warning(OPT_Wall, "Dumping %qE", v); debug_tree(v);
++  // What we want to do is disable the sibcall optimisation if we are calling a regparm function
++  // that takes noclobber registers. It's debatable that this is the "right" fix, but it solves the
++  // immediate problem of bad code generation in that situation.
++
++  CUMULATIVE_ARGS cargs;
++  m68k_init_cumulative_args(&cargs, TREE_TYPE(decl), NULL_RTX, decl, 0);
++  if(cargs.regparm_clobber) {
++      warning(OPT_Wsibcall_disabled, "Disabled -foptimize-sibling-calls due to regparm clobber");
++      return false;
++  }
++
++  //warning(OPT_Wall, "decl=%qE exp=%qE, kind=%d", decl, exp, kind);
++  /* sorry("%qE", decl); */
++  /* sorry("%qE", TYPE_ATTRIBUTES(decl)); */
++  /* if(auto attr = lookup_attribute("aregparm", TYPE_ATTRIBUTES(decl))) { */
++  /*     sorry("got attr"); */
++  /*     //sorry("%qE", attr); */
++  /* } */
++
+   kind = m68k_get_function_kind (current_function_decl);
+   if (kind == m68k_fk_normal_function)
+     /* We can always sibcall from a normal function, because it's
+@@ -1453,15 +1526,22 @@ m68k_ok_for_sibcall_p (tree decl, tree e
+   return false;
+ }
+ 
+-/* On the m68k all args are always pushed.  */
+-
+ static rtx
+-m68k_function_arg (cumulative_args_t cum ATTRIBUTE_UNUSED,
++m68k_function_arg (cumulative_args_t cum_v,
+ 		   machine_mode mode ATTRIBUTE_UNUSED,
+ 		   const_tree type ATTRIBUTE_UNUSED,
+ 		   bool named ATTRIBUTE_UNUSED)
+ {
+-  return NULL_RTX;
++    CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
++    if(cum->regparm_count > cum->regparm_next) {
++	int reg = cum->regparms[cum->regparm_next++];
++	//warning(OPT_Wattributes, "Using register %d", reg);
++	return gen_rtx_REG(mode, reg);
++    }
++    //warning (OPT_Wattributes, "%qE attribute only applies to functions", name);
++    //sorry("Not yet implemented");
++    //return gen_rtx_REG(mode, 8);
++    return NULL_RTX;
+ }
+ 
+ static void
+@@ -1470,7 +1550,7 @@ m68k_function_arg_advance (cumulative_ar
+ {
+   CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
+ 
+-  *cum += (mode != BLKmode
++  cum->bytes += (mode != BLKmode
+ 	   ? (GET_MODE_SIZE (mode) + 3) & ~3
+ 	   : (int_size_in_bytes (type) + 3) & ~3);
+ }
+Index: gnu/gcc/gcc/config/m68k/m68k.h
+===================================================================
+--- gnu.orig/gcc/gcc/config/m68k/m68k.h
++++ gnu/gcc/gcc/config/m68k/m68k.h
+@@ -490,13 +490,24 @@ extern enum reg_class regno_reg_class[];
+ /* On the m68k, all arguments are usually pushed on the stack.  */
+ #define FUNCTION_ARG_REGNO_P(N) 0
+ 
+-/* On the m68k, this is a single integer, which is a number of bytes
+-   of arguments scanned so far.  */
+-#define CUMULATIVE_ARGS int
+ 
+-/* On the m68k, the offset starts at 0.  */
+-#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS) \
+- ((CUM) = 0)
++/* Define a data type for recording info about an argument list during the scan of that argument
++   list. This data type should hold all necessary information about the function itself and about
++   the args processed so far, enough to enable macros such as FUNCTION_ARG to determine where the
++   next arg should go. */
++typedef struct m68k_args {
++    int bytes;			/* bytes of stack-based arguments scanned so far */
++    size_t regparm_next;	/* index of next regparm argument */
++    size_t regparm_count;	/* count of regparm arguments */
++    int regparms[16];		/* register numbers for regparm arguments */
++    bool regparm_clobber;	/* true if a regparm is in a noclobber register */
++} CUMULATIVE_ARGS;
++
++/* Initialize a variable CUM of type CUMULATIVE_ARGS for a call to a function whose data type is
++   FNTYPE. For a library call, FNTYPE is 0. */
++#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
++  m68k_init_cumulative_args (&(CUM), (FNTYPE), (LIBNAME), (FNDECL),		\
++			(N_NAMED_ARGS) != -1)
+ 
+ #define FUNCTION_PROFILER(FILE, LABELNO)  \
+   asm_fprintf (FILE, "\tlea %LLP%d,%Ra0\n\tjsr mcount\n", (LABELNO))
