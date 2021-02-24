@@ -1,0 +1,44 @@
+name: FreeRTOS Toolchain
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: cahirwpz/freertos-amiga-toolchain:latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache external archives
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-externals
+      with:
+        path: |
+          - fs-uae/fs-uae
+          - vasm/vasm
+          - vasm/ndk
+          - gnu/gmp
+          - gnu/mpfr
+          - gnu/mpc
+          - gnu/isl
+          - gnu/binutils
+          - gnu/gcc
+          - gnu/gdb
+        key: 20210224-1
+
+    - name: Unpack toolchain
+      run: make unpack
+
+    - name: Build toolchain
+      run: make PREFIX=/opt/FreeRTOS-Amiga
+
+    - name: Archive toolchain
+      run: tar cJf FreeRTOS-Amiga-Toolchain.tar.xz /opt/FreeRTOS-Amiga
+
+    - name: Upload toolchain
+      uses: actions/upload-artifact@v2
+      with:
+        name: FreeRTOS-Amiga-Toolchain
+        path: FreeRTOS-Amiga-Toolchain.tar.xz
