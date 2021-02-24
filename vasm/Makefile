@@ -1,8 +1,8 @@
 CURL = curl -L
 RM = rm -f
-LHA = lhasa
+LHA = lha
 
-VASM = vasm1_8g
+VASM = vasm1_8h
 NDK = NDK_3.9
 
 PREFIX ?= $(PWD)/local

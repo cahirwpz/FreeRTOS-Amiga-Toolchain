@@ -13,7 +13,7 @@ GMP = gmp-6.1.2
 MPC = mpc-1.1.0
 BINUTILS = binutils-2.32
 GCC = gcc-8.3.0
-GDB = gdb-8.3
+GDB = gdb-10.1
 
 ROOTDIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HOSTDIR := $(ROOTDIR)/host
@@ -65,7 +65,7 @@ gmp-clean:
 ### Library for multiple-precision floating-point computations
 
 $(MPFR).tar.xz:
-	$(CURL) -o $@ "https://www.mpfr.org/$(MPFR)/$(MPFR).tar.xz"
+	$(CURL) -o $@ "https://ftp.gnu.org/gnu/mpfr/$(MPFR).tar.xz"
 
 mpfr-unpack: mpfr/.unpack
 mpfr/.unpack: $(MPFR).tar.xz
