@@ -219,8 +219,12 @@ gcc/.unpack: $(GCC).tar.xz
 	mv $(GCC) gcc
 	touch $@
 
+gcc-patch: .gcc-pc/applied-patches
+.gcc-pc/applied-patches: gcc/.unpack
+	./gcc-quilt push -a
+
 gcc-configure: gcc/.configure
-gcc/.configure: gcc/.unpack binutils/.install $(LIBRARIES)
+gcc/.configure: .gcc-pc/applied-patches binutils/.install $(LIBRARIES)
 	cd gcc && PATH=$(PREFIX)/bin:$$PATH ./configure \
 		--target=$(TARGET) \
 		--prefix=$(PREFIX) \
@@ -249,6 +253,7 @@ gcc/.install: gcc/.build
 	touch $@
 
 gcc-clean:
+	-./gcc-quilt pop -a
 	$(RM) -r gcc
 
 .PHONY: gcc-unpack gcc-configure gcc-build gcc-install gcc-clean

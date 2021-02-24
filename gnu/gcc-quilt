@@ -1,0 +1,3 @@
+#!/bin/sh
+
+QUILT_PC='.gcc-pc' QUILT_PATCHES='gcc-patches' quilt $@
