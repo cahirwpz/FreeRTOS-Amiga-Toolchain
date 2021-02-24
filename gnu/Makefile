@@ -65,7 +65,7 @@ gmp-clean:
 ### Library for multiple-precision floating-point computations
 
 $(MPFR).tar.xz:
-	$(CURL) -o $@ "https://www.mpfr.org/$(MPFR)/$(MPFR).tar.xz"
+	$(CURL) -o $@ "https://ftp.gnu.org/gnu/mpfr/$(MPFR).tar.xz"
 
 mpfr-unpack: mpfr/.unpack
 mpfr/.unpack: $(MPFR).tar.xz
