@@ -26,7 +26,7 @@ jobs:
           - gnu/binutils
           - gnu/gcc
           - gnu/gdb
-        key: 20200726-1
+        key: 20210224-1
 
     - name: Unpack toolchain
       run: make unpack
