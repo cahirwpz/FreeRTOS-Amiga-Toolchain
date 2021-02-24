@@ -7,7 +7,7 @@ CFLAGS ?= -O2 -Wall
 PREFIX ?= $(PWD)/local
 GETTEXT_PATH = $(wildcard /usr/local/Cellar/gettext/*)
 
-VER = 3.0.0
+VER = 3.0.5
 
 all: install
 
@@ -32,7 +32,6 @@ fs-uae/.configure: .pc/applied-patches
 		--prefix=$(PREFIX) \
 		--enable-gdbstub \
 		--without-libmpeg2 \
-		--disable-a2065 \
 		--disable-action-replay \
 		--disable-ahi \
 		--disable-arcadia \
@@ -44,7 +43,6 @@ fs-uae/.configure: .pc/applied-patches
 		--disable-pearpc-cpu \
 		--disable-ppc \
 		--disable-prowizard \
-		--disable-slirp \
 		--disable-qemu-cpu \
 		--disable-qemu-slirp \
 		--disable-uaenet \
